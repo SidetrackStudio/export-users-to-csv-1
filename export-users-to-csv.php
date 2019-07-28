@@ -4,7 +4,7 @@
  * @version 1.0.0
  */
 /*
-Plugin Name: Export Users to CSV
+Plugin Name: Export Users to CSV Second
 Plugin URI: http://wordpress.org/extend/plugins/export-users-to-csv/
 Description: Export Users data and metadata to a csv file.
 Version: 1.0.0
@@ -13,20 +13,21 @@ Author URI: http://ulrichsossou.com/
 License: GPL2
 Text Domain: export-users-to-csv
 */
-/*  Copyright 2011  Ulrich Sossou  (http://github.com/sorich87)
+/*
+  Copyright 2011  Ulrich Sossou  (http://github.com/sorich87)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License, version 2, as
-    published by the Free Software Foundation.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License, version 2, as
+	published by the Free Software Foundation.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 load_plugin_textdomain( 'export-users-to-csv', false, basename( dirname( __FILE__ ) ) . '/languages' );
@@ -36,7 +37,7 @@ load_plugin_textdomain( 'export-users-to-csv', false, basename( dirname( __FILE_
  *
  * @since 0.1
  **/
-class PP_EU_Export_Users {
+class FFS_PP_EU_Export_Users {
 
 	/**
 	 * Class contructor
@@ -69,7 +70,7 @@ class PP_EU_Export_Users {
 
 			$args = array(
 				'fields' => 'all_with_meta',
-				'role' => stripslashes( $_POST['role'] )
+				'role'   => stripslashes( $_POST['role'] ),
 			);
 
 			add_action( 'pre_user_query', array( $this, 'pre_user_query' ) );
@@ -83,8 +84,9 @@ class PP_EU_Export_Users {
 			}
 
 			$sitename = sanitize_key( get_bloginfo( 'name' ) );
-			if ( ! empty( $sitename ) )
+			if ( ! empty( $sitename ) ) {
 				$sitename .= '.';
+			}
 			$filename = $sitename . 'users.' . date( 'Y-m-d-H-i-s' ) . '.csv';
 
 			header( 'Content-Description: File Transfer' );
@@ -96,29 +98,36 @@ class PP_EU_Export_Users {
 			global $wpdb;
 
 			$data_keys = array(
-				'ID', 'user_login', 'user_pass',
-				'user_nicename', 'user_email', 'user_url',
-				'user_registered', 'user_activation_key', 'user_status',
-				'display_name'
+				'ID',
+				'user_login',
+				'user_pass',
+				'user_nicename',
+				'user_email',
+				'user_url',
+				'user_registered',
+				'user_activation_key',
+				'user_status',
+				'display_name',
 			);
 			$meta_keys = $wpdb->get_results( "SELECT distinct(meta_key) FROM $wpdb->usermeta" );
 			$meta_keys = wp_list_pluck( $meta_keys, 'meta_key' );
-			$fields = array_merge( $data_keys, $meta_keys );
+			$fields    = array_merge( $data_keys, $meta_keys );
 
 			$headers = array();
 			foreach ( $fields as $key => $field ) {
-				if ( in_array( $field, $exclude_data ) )
-					unset( $fields[$key] );
-				else
+				if ( in_array( $field, $exclude_data ) ) {
+					unset( $fields[ $key ] );
+				} else {
 					$headers[] = '"' . strtolower( $field ) . '"';
+				}
 			}
 			echo implode( ',', $headers ) . "\n";
 
 			foreach ( $users as $user ) {
 				$data = array();
 				foreach ( $fields as $field ) {
-					$value = isset( $user->{$field} ) ? $user->{$field} : '';
-					$value = is_array( $value ) ? serialize( $value ) : $value;
+					$value  = isset( $user->{$field} ) ? $user->{$field} : '';
+					$value  = is_array( $value ) ? serialize( $value ) : $value;
 					$data[] = '"' . str_replace( '"', '""', $value ) . '"';
 				}
 				echo implode( ',', $data ) . "\n";
@@ -134,17 +143,18 @@ class PP_EU_Export_Users {
 	 * @since 0.1
 	 **/
 	public function users_page() {
-		if ( ! current_user_can( 'list_users' ) )
+		if ( ! current_user_can( 'list_users' ) ) {
 			wp_die( __( 'You do not have sufficient permissions to access this page.', 'export-users-to-csv' ) );
-?>
+		}
+		?>
 
 <div class="wrap">
 	<h2><?php _e( 'Export users to a CSV file', 'export-users-to-csv' ); ?></h2>
-	<?php
-	if ( isset( $_GET['error'] ) ) {
-		echo '<div class="updated"><p><strong>' . __( 'No user found.', 'export-users-to-csv' ) . '</strong></p></div>';
-	}
-	?>
+		<?php
+		if ( isset( $_GET['error'] ) ) {
+			echo '<div class="updated"><p><strong>' . __( 'No user found.', 'export-users-to-csv' ) . '</strong></p></div>';
+		}
+		?>
 	<form method="post" action="" enctype="multipart/form-data">
 		<?php wp_nonce_field( 'pp-eu-export-users-users-page_export', '_wpnonce-pp-eu-export-users-users-page_export' ); ?>
 		<table class="form-table">
@@ -177,11 +187,11 @@ class PP_EU_Export_Users {
 			</tr>
 		</table>
 		<p class="submit">
-			<input type="hidden" name="_wp_http_referer" value="<?php echo $_SERVER['REQUEST_URI'] ?>" />
+			<input type="hidden" name="_wp_http_referer" value="<?php echo $_SERVER['REQUEST_URI']; ?>" />
 			<input type="submit" class="button-primary" value="<?php _e( 'Export', 'export-users-to-csv' ); ?>" />
 		</p>
 	</form>
-<?php
+		<?php
 	}
 
 	public function exclude_data() {
@@ -195,14 +205,17 @@ class PP_EU_Export_Users {
 
 		$where = '';
 
-		if ( ! empty( $_POST['start_date'] ) )
+		if ( ! empty( $_POST['start_date'] ) ) {
 			$where .= $wpdb->prepare( " AND $wpdb->users.user_registered >= %s", date( 'Y-m-d', strtotime( $_POST['start_date'] ) ) );
+		}
 
-		if ( ! empty( $_POST['end_date'] ) )
+		if ( ! empty( $_POST['end_date'] ) ) {
 			$where .= $wpdb->prepare( " AND $wpdb->users.user_registered < %s", date( 'Y-m-d', strtotime( '+1 month', strtotime( $_POST['end_date'] ) ) ) );
+		}
 
-		if ( ! empty( $where ) )
+		if ( ! empty( $where ) ) {
 			$user_search->query_where = str_replace( 'WHERE 1=1', "WHERE 1=1$where", $user_search->query_where );
+		}
 
 		return $user_search;
 	}
@@ -210,19 +223,23 @@ class PP_EU_Export_Users {
 	private function export_date_options() {
 		global $wpdb, $wp_locale;
 
-		$months = $wpdb->get_results( "
+		$months = $wpdb->get_results(
+			"
 			SELECT DISTINCT YEAR( user_registered ) AS year, MONTH( user_registered ) AS month
 			FROM $wpdb->users
 			ORDER BY user_registered DESC
-		" );
+		"
+		);
 
 		$month_count = count( $months );
-		if ( !$month_count || ( 1 == $month_count && 0 == $months[0]->month ) )
+		if ( ! $month_count || ( 1 == $month_count && 0 == $months[0]->month ) ) {
 			return;
+		}
 
 		foreach ( $months as $date ) {
-			if ( 0 == $date->year )
+			if ( 0 == $date->year ) {
 				continue;
+			}
 
 			$month = zeroise( $date->month, 2 );
 			echo '<option value="' . $date->year . '-' . $month . '">' . $wp_locale->get_month( $month ) . ' ' . $date->year . '</option>';
@@ -230,4 +247,4 @@ class PP_EU_Export_Users {
 	}
 }
 
-new PP_EU_Export_Users;
+new FFS_PP_EU_Export_Users();
